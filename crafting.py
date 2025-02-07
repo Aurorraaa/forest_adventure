@@ -13,16 +13,20 @@ class CraftingBookMenu:
             data = json.load(f)
 
         self.craftable_items = [item for item in data if "ingredients" in item]
+        self.item_names = {}
+        for item in data:
+            if "id" in item and "name" in item:
+                self.item_names[item["id"]] = item["name"]
+
         self.font = pygame.font.Font(None, 24)
+        self.craft_sound = pygame.mixer.Sound("Data/eb558a111597a65.mp3")
 
         self.book_image = pygame.image.load(self.book_image_path).convert_alpha()
         self.book_rect = self.book_image.get_rect()
-
         self.book_rect.center = (400, 300)
 
         self.recipes_per_page = 6
         self.current_page = 0
-
         self.total_pages = (len(self.craftable_items) + self.recipes_per_page - 1) // self.recipes_per_page
 
         self.left_page_rect = pygame.Rect(self.book_rect.x + 50, self.book_rect.y + 50, 200, 300)
@@ -34,7 +38,6 @@ class CraftingBookMenu:
                                             self.book_rect.centery - 20, 30, 40)
 
         self.arrow_color = (200, 200, 200)
-
         self.running = False
 
     def open(self, screen, clock):
@@ -64,12 +67,9 @@ class CraftingBookMenu:
                         self.turn_page(1)
 
             screen.blit(background_surf, (0, 0))
-
             screen.blit(self.book_image, self.book_rect)
-
             pygame.draw.rect(screen, self.arrow_color, self.left_arrow_rect)
             pygame.draw.rect(screen, self.arrow_color, self.right_arrow_rect)
-
             arrow_font = pygame.font.Font(None, 36)
             left_arrow_text = arrow_font.render("<", True, (0, 0, 0))
             right_arrow_text = arrow_font.render(">", True, (0, 0, 0))
@@ -79,7 +79,6 @@ class CraftingBookMenu:
                                            self.right_arrow_rect.centery - right_arrow_text.get_height() // 2))
 
             self.draw_recipes(screen)
-
             pygame.display.flip()
             clock.tick(60)
 
@@ -124,17 +123,21 @@ class CraftingBookMenu:
         text_surf = self.font.render(recipe["name"], True, (255, 255, 255))
         screen.blit(text_surf, (x + 40, y))
 
-        ing_str = ", ".join(f"{ing['id']}x{ing['quantity']}" for ing in recipe["ingredients"])
-        ing_surf = self.font.render(ing_str, True, (200, 200, 200))
-        screen.blit(ing_surf, (x + 40, y + 20))
+        line_height = self.font.get_linesize()
+        base_y = y + 20
+        for i, ing in enumerate(recipe["ingredients"]):
+            ing_text = f"{self.item_names.get(ing['id'], ing['id'])} x {ing['quantity']}"
+            ing_surf = self.font.render(ing_text, True, (200, 200, 200))
+            screen.blit(ing_surf, (x + 40, base_y + i * line_height))
 
-        recipe_hitbox = pygame.Rect(x, y, 200, 40)
+        hitbox_height = 20 + len(recipe["ingredients"]) * line_height
+        recipe_hitbox = pygame.Rect(x, y, 200, hitbox_height)
         return recipe_hitbox
 
     def check_recipe_click(self, mx, my):
 
-       for recipe, hitbox in self.recipe_hitboxes:
-           if hitbox.collidepoint(mx, my):
+        for recipe, hitbox in self.recipe_hitboxes:
+            if hitbox.collidepoint(mx, my):
                 self.try_craft(recipe)
                 return
 
@@ -143,6 +146,7 @@ class CraftingBookMenu:
             self.remove_ingredients(recipe)
             self.add_result_item(recipe)
             print(f"Скрафтили {recipe['name']}")
+            self.craft_sound.play()
         else:
             print("Недостаточно ресурсов!")
 

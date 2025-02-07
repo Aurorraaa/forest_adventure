@@ -1,4 +1,6 @@
 import sys
+from statistics import quantiles
+
 import pygame
 import pytmx
 import random as rnd
@@ -167,7 +169,7 @@ class Object(pygame.sprite.Sprite):
         self.inventory = Inventory()
         self.max_hp = 100
         self.hp = 100
-
+        self.attack_sound = pygame.mixer.Sound("Data/metallicheskiy-svist-zamaha.mp3")
         self.dx = 0
         self.dy = 0
         self.go = False
@@ -300,6 +302,7 @@ class Object(pygame.sprite.Sprite):
             self.is_attacking = True
             self.attack_frame = 0
             self.attack_cooldown = 15
+            self.attack_sound.play()
 
             if self.last_direction == "right":
                 self.current_attack_animation = self.attack_animation_r
@@ -309,6 +312,8 @@ class Object(pygame.sprite.Sprite):
     def animate_attack(self):
         if self.attack_frame < len(self.current_attack_animation):
             self.image = self.current_attack_animation[int(self.attack_frame)]
+            if self.attack_frame < 1 or self.attack_frame == 5 or self.attack_frame == 15:
+                self.attack_sound.play()
             self.attack_frame += 0.5
         else:
             self.attack_frame = 0
@@ -350,13 +355,13 @@ class Object(pygame.sprite.Sprite):
         self.go = False
 
     def sell_item_to_merchant(self, item, merchant):
-        sell_price = item["price"] // 2
+        sell_price = item["price"]
         # проверяем, есть ли предмет у игрока
         if item in self.inventory.get_all_items():
             if merchant.coins >= sell_price:
                 merchant.coins -= sell_price
                 self.coins += sell_price
-                self.inventory.remove_existing_item(item)
+                self.inventory.remove_item(item["id"], quantity=1)
                 merchant.inventory.add_existing_item(item)
                 print(f"Продано {item['name']} за {sell_price} монет.")
 
