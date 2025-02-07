@@ -198,14 +198,11 @@ class Inventory:
             rect_abs = pygame.Rect(abs_x, abs_y, slot["rect"].width, slot["rect"].height)
 
             if rect_abs.collidepoint(mouse_pos):
-                # Слот найден. Есть ли там предмет?
                 if slot["item"] is not None:
-                    # Берём этот предмет
                     Inventory.dragging_item = slot["item"]
                     Inventory.dragging_from = i
-                    slot["item"] = None  # убрали из слота
+                    slot["item"] = None  
 
-                    # drag_offset, чтобы иконка не "прыгала"
                     icon_rect = Inventory.dragging_item["icon"].get_rect(center=rect_abs.center)
                     dx = mouse_pos[0] - icon_rect.x
                     dy = mouse_pos[1] - icon_rect.y
@@ -227,7 +224,6 @@ class Inventory:
             abs_y = self.bg_rect.y + slot["rect"].y
             rect_abs = pygame.Rect(abs_x, abs_y, slot["rect"].width, slot["rect"].height)
             if rect_abs.collidepoint(mouse_pos):
-                # Если пустой слот - кладём туда
                 if slot["item"] is not None and slot["item"]["name"] == Inventory.dragging_item["name"]:
                     free_space = slot["item"]["max_stack"] - slot["item"]["current_stack"]
                     if free_space > 0:
