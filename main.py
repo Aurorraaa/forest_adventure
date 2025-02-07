@@ -254,7 +254,6 @@ class Object(pygame.sprite.Sprite):
                     self.last_direction = "left"
 
                 if self.dx != 0:
-                    # Если двигаемся горизонтально, сбрасываем кадры, если Frame превышает длину списка
                     if self.Frame >= len(self.pers_right):
                         self.Frame = 0
                     if self.dx > 0:
@@ -262,8 +261,6 @@ class Object(pygame.sprite.Sprite):
                     elif self.dx < 0:
                         self.animate_left()
                 else:
-                    # Если dx == 0 (нет горизонтального движения), но (вертикальное) движение есть,
-                    # используем анимацию, соответствующую self.last_direction.
                     if self.Frame >= len(self.pers_right):
                         self.Frame = 0
                     if self.last_direction == "right":
@@ -373,7 +370,6 @@ class Object(pygame.sprite.Sprite):
 
 
     def draw_player_hp(self, screen, player):
-        # Размеры полоски
         bar_width = 200
         bar_height = 20
 
@@ -384,14 +380,11 @@ class Object(pygame.sprite.Sprite):
 
         hp_ratio = player.hp / player.max_hp if player.max_hp > 0 else 0
 
-        # Рисуем рамку (белую)
         pygame.draw.rect(screen, (255, 255, 255), (x, y, bar_width, bar_height), 2)
 
-        # Заполняем красным на процент оставшегося HP
         fill_width = int(bar_width * hp_ratio)
         pygame.draw.rect(screen, (255, 0, 0), (x, y, fill_width, bar_height))
 
-        # (Дополнительно) Вывести текст вида "HP: 100/100"
         font = pygame.font.Font(None, 24)
         text_surf = font.render(f"HP: {player.hp}/{player.max_hp}", True, (255, 255, 255))
 
@@ -426,12 +419,10 @@ def show_victory_screen(screen, clock):
     text_surf = font.render(text, True, (255, 255, 255))
     text_rect = text_surf.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
 
-    # Заполняем экран чёрным цветом и отрисовываем сообщение
     screen.fill((0, 0, 0))
     screen.blit(text_surf, text_rect)
     pygame.display.flip()
 
-    # Ждем 3000 мс (3 секунды) или пока пользователь не нажмёт клавишу
     victory_start = pygame.time.get_ticks()
     while pygame.time.get_ticks() - victory_start < 5000:
         for event in pygame.event.get():
@@ -440,7 +431,6 @@ def show_victory_screen(screen, clock):
                 sys.exit()
         clock.tick(60)
 
-    # После ожидания завершаем игру
     pygame.quit()
     sys.exit()
 
