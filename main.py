@@ -3,8 +3,6 @@ import pygame
 import pytmx
 import random as rnd
 
-from pygame.examples.testsprite import screen_dims
-
 from Blacksmith import Blacksmith
 from menu import show_main_menu, show_settings_menu
 from invent import Inventory
@@ -180,16 +178,27 @@ class Object(pygame.sprite.Sprite):
         self.attack_cooldown = 0
         self.base_damage = 5
         self.damage = self.base_damage
-        self.attack_animation = [pygame.image.load(f"Data/gg_sprites/atk_r/{f}").convert_alpha() for f in
-                                 ["tile000.png", "tile001.png", "tile002.png", "tile003.png", "tile004.png",
-                                  "tile005.png",
-                                  "tile006.png", "tile007.png", "tile008.png",
-                                  "tile009.png", "tile010.png", "tile011.png", "tile012.png", "tile013.png",
-                                  "tile014.png",
-                                  "tile015.png", "tile016.png", "tile017.png",
-                                  "tile018.png", "tile019.png", "tile020.png", "tile021.png", "tile022.png",
-                                  "tile023.png",
-                                  "tile024.png", "tile025.png"]]
+        self.attack_animation_r = [pygame.image.load(f"Data/gg_sprites/atk_r/{f}").convert_alpha() for f in
+                                   ["tile000.png", "tile001.png", "tile002.png", "tile003.png", "tile004.png",
+                                    "tile005.png",
+                                    "tile006.png", "tile007.png", "tile008.png",
+                                    "tile009.png", "tile010.png", "tile011.png", "tile012.png", "tile013.png",
+                                    "tile014.png",
+                                    "tile015.png", "tile016.png", "tile017.png",
+                                    "tile018.png", "tile019.png", "tile020.png", "tile021.png", "tile022.png",
+                                    "tile023.png",
+                                    "tile024.png", "tile025.png"]]
+
+        self.attack_animation_l = [pygame.image.load(f"Data/gg_sprites/atk_l/{f}").convert_alpha() for f in
+                                   ["tile000.png", "tile001.png", "tile002.png", "tile003.png", "tile004.png",
+                                    "tile005.png",
+                                    "tile006.png", "tile007.png", "tile008.png",
+                                    "tile009.png", "tile010.png", "tile011.png", "tile012.png", "tile013.png",
+                                    "tile014.png",
+                                    "tile015.png", "tile016.png", "tile017.png",
+                                    "tile018.png", "tile019.png", "tile020.png", "tile021.png", "tile022.png",
+                                    "tile023.png",
+                                    "tile024.png", "tile025.png"]]
 
         self.pers_right = [pygame.image.load(
             f"Data/gg_sprites/right/{f}").convert_alpha() for f in
@@ -292,10 +301,15 @@ class Object(pygame.sprite.Sprite):
             self.attack_frame = 0
             self.attack_cooldown = 15
 
+            if self.last_direction == "right":
+                self.current_attack_animation = self.attack_animation_r
+            else:
+                self.current_attack_animation = self.attack_animation_l
+
     def animate_attack(self):
-        if self.attack_frame < len(self.attack_animation):
-            self.image = self.attack_animation[self.attack_frame]
-            self.attack_frame += 1
+        if self.attack_frame < len(self.current_attack_animation):
+            self.image = self.current_attack_animation[int(self.attack_frame)]
+            self.attack_frame += 0.5
         else:
             self.attack_frame = 0
             self.is_attacking = False
@@ -311,7 +325,8 @@ class Object(pygame.sprite.Sprite):
             return pygame.Rect(self.rect.x, self.rect.bottom, self.rect.width, 30)
 
     def check_attack_collision(self, tile_map):
-        if self.is_attacking:
+        mid_frame = len(self.current_attack_animation) // 2
+        if self.is_attacking and (self.attack_frame == 1 or self.attack_frame == mid_frame):
             attack_rect = self.get_attack_hitbox()
             dropped_items = tile_map.check_ore_interaction(attack_rect, self.damage)
 
@@ -367,7 +382,6 @@ class Object(pygame.sprite.Sprite):
                     if item["damage"] > best_weapon_damage:
                         best_weapon_damage = item["damage"]
         self.damage = self.base_damage + best_weapon_damage
-
 
     def draw_player_hp(self, screen, player):
         bar_width = 200
@@ -545,7 +559,7 @@ def main_game(screen, clock, volume):
                                 print("Босс Xonas призван!")
                                 if not battle_music_started:
                                     pygame.mixer.music.fadeout(1500)  # плавное затихание за 2000 мс (2 сек)
-                                    pygame.time.set_timer(pygame.USEREVENT + 1,1500)
+                                    pygame.time.set_timer(pygame.USEREVENT + 1, 1500)
                                     battle_music_started = True
                             break
             elif event.type == pygame.MOUSEBUTTONUP:
@@ -587,6 +601,7 @@ def main_game(screen, clock, volume):
                 player.animate_idle()
 
             player.update(tile_map)
+            player.rect.clamp_ip(pygame.Rect(0, 0, map_width, map_height))
 
             if xonas and xonas.is_alive:
                 xonas.update(player, vortex_grp)
@@ -596,8 +611,6 @@ def main_game(screen, clock, volume):
                     attack_rect = player.get_attack_hitbox()
                     if attack_rect.colliderect(xonas.rect):
                         xonas.take_damage(player.damage)
-
-
 
             for vortex in vortex_grp:
                 vortex.update(player)
