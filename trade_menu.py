@@ -28,20 +28,17 @@ class Trade_menu():
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # ЛКМ
+                    if event.button == 1:
                         mx, my = event.pos
                         # Проверяем клик по предмету игрока
                         clicked_item = self.get_clicked_item(self.player.inventory, mx, my,
                                                              self.player_list_x, self.player_list_y)
                         if clicked_item is not None:
-                            # Игрок продаёт предмет торговцу
                             self.player.sell_item_to_merchant(clicked_item, self.merchant)
                             continue
-                        # Проверяем клик по предмету торговца
                         clicked_item = self.get_clicked_item(self.merchant.inventory, mx, my,
                                                              self.merchant_list_x, self.merchant_list_y)
                         if clicked_item is not None:
-                            # Игрок покупает предмет у торговца
                             self.player.buy_item_from_merchant(clicked_item, self.merchant)
                             continue
 
@@ -56,7 +53,6 @@ class Trade_menu():
 
             pygame.display.flip()
             clock.tick(60)
-        # Выходим из цикла
         return
 
     def draw_header(self, screen):
