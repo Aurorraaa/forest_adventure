@@ -152,7 +152,7 @@ def show_settings_menu(screen, clock, volume):
                     if volume_minus_rect.collidepoint(event.pos):
                         current_volume = max(0.0, current_volume - 0.1)
                         pygame.mixer.music.set_volume(current_volume)
-                    # Громкость +
+
                     if volume_plus_rect.collidepoint(event.pos):
                         current_volume = min(1.0, current_volume + 0.1)
                         pygame.mixer.music.set_volume(current_volume)
