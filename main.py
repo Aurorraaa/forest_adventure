@@ -608,7 +608,7 @@ def main_game(screen, clock, volume):
                         xonas.take_damage(player.damage)
 
 
-                # Обновляем вихри
+
             for vortex in vortex_grp:
                 vortex.update(player)
                 if vortex.done:
