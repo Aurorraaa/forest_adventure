@@ -1,5 +1,4 @@
 import sys
-from statistics import quantiles
 
 import pygame
 import pytmx
